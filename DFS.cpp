@@ -7,9 +7,12 @@ using namespace std;
 
 #define NONE 0
 #define UNDEFINED -1
+#define BLANCO  1
+#define GRIS    2
+#define NEGRO   3
 
 int r, c, q, k;
-vector<int> start, finish, parent;
+vector<int> start, finish, parent, color, backedges;
 vector<vector<int>> grafo;
 
 void printVector(vector<pair<int, int>> vector){
@@ -19,9 +22,9 @@ void printVector(vector<pair<int, int>> vector){
 
 void printGrafo(vector<vector<int>> grafo){
     for(int i = 0; i < grafo.size(); ++i){
-        cout << i << ": {";
+        cout << i+1 << ": {";
         for(int j = 0; j < grafo[i].size(); ++j){
-            cout << grafo[i][j] << " ";
+            cout << grafo[i][j] +1 << " ";
         }
         cout << "}" << endl;
     }
@@ -37,15 +40,20 @@ void DFS_visit(int father){
     k += 1;
     start[father] = k;
     vector<int> children = grafo[father];
-
-    for(int i = 0; i < children.size(); ++i){
-        if(parent[children[i]] == UNDEFINED){
+    
+    color[father] = GRIS;  
+    for(int i = 0; i < children.size(); ++i){     
+        if(color[children[i]] == BLANCO){
             parent[children[i]] = father;
             DFS_visit(children[i]);
+        } else {
+            cout << father +1 << " " << children[i] +1<< " es un backedge" << endl;
+            grafo[father][children[i]] 
         }
     }
     k += 1;
     finish[father] = k;
+    color[father] == NEGRO;
 }
 
 void DFS(){
@@ -53,17 +61,18 @@ void DFS(){
     start = vector(r, UNDEFINED);
     finish = vector(r, UNDEFINED);
     parent = vector(r, UNDEFINED);
+    backedges = vector(r, NONE);
+    color = vector(r, BLANCO);
 
     for(int node = 0; node < r; node++){
-        if(parent[node] == UNDEFINED){
-            parent[node] = NONE;
+        if(color[node] == BLANCO){
             DFS_visit(node);
         }
     }
 }
 
 bool recorridoBueno(pair<int, int> query){
-    return 0;
+    return backedges[query.first] !=  NONE || backedges[query.second] ==  NONE;
 }
 
 int main(int argc, char const *argv[]){
@@ -73,8 +82,7 @@ int main(int argc, char const *argv[]){
     entrada.open(argv[1]);
     //time_t init_time;
     //time(&init_time);
-    int i = 1;
-    vector<pair<int, int>> rooms;
+
     vector<pair<int, int>> querys;
 
     entrada >> r >> c >> q;
@@ -85,7 +93,7 @@ int main(int argc, char const *argv[]){
         int f, s;
         entrada >> f >> s; 
         grafo[f-1].push_back(s-1); 
-        grafo[s-1].push_back(f-1); 
+        //grafo[s-1].push_back(f-1); 
     }
     
     //creo las querys
@@ -96,18 +104,18 @@ int main(int argc, char const *argv[]){
     }
 
     DFS();
+    cout << recorridoBueno(make_pair<int, int>(1,5)) << endl;
+    //print(start);
+    cout << endl;
+    //print(finish);
+    cout << endl;
+    //print(parent);
+    cout << endl;
 
-    print(start);
-    cout << endl;
-    print(finish);
-    cout << endl;
-    print(parent);
-    cout << endl;
 
-
-    printGrafo(grafo);
+    //printGrafo(grafo);
     cout << endl;
-    printVector(querys);
+    //printVector(querys);
     return 0;
 }
     //time_t end_time;
