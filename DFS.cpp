@@ -12,8 +12,8 @@ using namespace std;
 #define NEGRO   3
 
 int r, c, q, k;
-vector<int> start, finish, parent, color, backedges;
-vector<vector<int>> grafo;
+vector<int> start, finish, parent, color, backedges, verticesCiclos;
+vector<vector<int>> grafo, aristasCiclos;
 
 void printVector(vector<pair<int, int>> vector){
     for(int i = 0; i < vector.size(); ++i)
@@ -27,6 +27,28 @@ void printGrafo(vector<vector<int>> grafo){
             cout << grafo[i][j] +1 << " ";
         }
         cout << "}" << endl;
+    }
+}
+
+void printPath(int s, int v) {
+    if (v == s) {
+        cout << s+1 << endl;
+    } else {
+        cout << v+1 << endl;
+        
+        verticesCiclos[v] = true;
+        aristasCiclos[s][v] = 1;
+        aristasCiclos[v][s] = 1;
+        aristasCiclos[parent[v]][v] = 1;
+        aristasCiclos[v][parent[v]] = 1;
+
+        printGrafo(aristasCiclos);
+        
+        cout << "la arista" << parent[v]+1 << " " << v +1<< "esta en un ciclo" << endl;
+        if (!verticesCiclos[parent[v]]) {
+            printPath(s, parent[v]);
+        }
+    
     }
 }
 
@@ -47,8 +69,10 @@ void DFS_visit(int father){
             parent[children[i]] = father;
             DFS_visit(children[i]);
         } else {
-            cout << father +1 << " " << children[i] +1<< " es un backedge" << endl;
-            grafo[father][children[i]] 
+            if (!(parent[father] == children[i]) && start[father] > start[children[i]]) {
+                cout << father +1 << " " << children[i] +1 << " es un backedge" << endl;
+                printPath(children[i], father);
+            }
         }
     }
     k += 1;
@@ -58,11 +82,13 @@ void DFS_visit(int father){
 
 void DFS(){
     k = 0;
-    start = vector(r, UNDEFINED);
-    finish = vector(r, UNDEFINED);
-    parent = vector(r, UNDEFINED);
-    backedges = vector(r, NONE);
-    color = vector(r, BLANCO);
+    start = vector<int>(r, UNDEFINED);
+    finish = vector<int>(r, UNDEFINED);
+    parent = vector<int>(r, UNDEFINED);
+    backedges = vector<int>(r, NONE);
+    color = vector<int>(r, BLANCO);
+    aristasCiclos = vector<vector<int>>(r,vector<int>(r));
+    verticesCiclos = vector<int>(r,false);
 
     for(int node = 0; node < r; node++){
         if(color[node] == BLANCO){
@@ -72,7 +98,7 @@ void DFS(){
 }
 
 bool recorridoBueno(pair<int, int> query){
-    return backedges[query.first] !=  NONE || backedges[query.second] ==  NONE;
+    return 0;
 }
 
 int main(int argc, char const *argv[]){
@@ -93,7 +119,7 @@ int main(int argc, char const *argv[]){
         int f, s;
         entrada >> f >> s; 
         grafo[f-1].push_back(s-1); 
-        //grafo[s-1].push_back(f-1); 
+        grafo[s-1].push_back(f-1); 
     }
     
     //creo las querys
@@ -104,7 +130,7 @@ int main(int argc, char const *argv[]){
     }
 
     DFS();
-    cout << recorridoBueno(make_pair<int, int>(1,5)) << endl;
+    //cout << recorridoBueno(make_pair<int, int>(1,5)) << endl;
     //print(start);
     cout << endl;
     //print(finish);
@@ -120,6 +146,4 @@ int main(int argc, char const *argv[]){
 }
     //time_t end_time;
     //time(&end_time);
-   // cout << "tiempo: " << difftime(end_time, init_time) << endl;
-    
-
+    //cout << "tiempo: " << difftime(end_time, init_time) << endl;
